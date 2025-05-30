@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  postgresTest:
+    image: postgres:15
+    container_name: postgres_db_test
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data_test:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  redis:
+    image: redis:7
+    container_name: redis_cache
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+  nest-app:
+    build: .
+    container_name: nest_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASS: mypassword
+      DB_NAME: mydb
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: your_jwt_secret_here
+      PORT: 3000
+    networks:
+      - backend
+    # command: sh -c "npm run prisma:migrate && npm run start:prod"
+    
+
+
+volumes:
+  postgres_data:
+  postgres_data_test:
+
+networks:
+  backend:
+    driver: bridge
