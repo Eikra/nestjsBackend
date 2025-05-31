@@ -1,0 +1,6 @@
+# Good:
+node_modules
+dist
+.git
+# But NOT this:
+# .yarn

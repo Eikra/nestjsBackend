@@ -26,7 +26,7 @@ docker container prune -f
 # Remove unused volumes
 docker volume prune -f
 
-docker rmi nestjs-api-tutorial-nest-app
+docker rmi nestjsbackend-nest-app
 
 docker volume ls -q | xargs -r docker volume rm
 

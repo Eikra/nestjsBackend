@@ -16,20 +16,35 @@ services:
     networks:
       - backend
 
-  postgresTest:
-    image: postgres:15
-    container_name: postgres_db_test
+  # postgresTest:
+  #   image: postgres:15
+  #   container_name: postgres_db_test
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: mydb
+  #     POSTGRES_USER: myuser
+  #     POSTGRES_PASSWORD: mypassword
+  #   ports:
+  #     - "5435:5432"
+  #   volumes:
+  #     - postgres_data_test:/var/lib/postgresql/data
+  #   networks:
+  #     - backend
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend_app
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
     ports:
-      - "5435:5432"
-    volumes:
-      - postgres_data_test:/var/lib/postgresql/data
+      - "3001:3000"    # Host port 3001 maps to container port 3000
+    depends_on:
+      - nest-app
+    environment:
+      NEXT_PUBLIC_API_URL: http://nest-app:3000
     networks:
       - backend
+
 
   redis:
     image: redis:7
@@ -39,8 +54,11 @@ services:
       - "6379:6379"
     networks:
       - backend
+
+
+
   nest-app:
-    build: .
+    build: ./todo-beckend
     container_name: nest_app
     restart: unless-stopped
     ports:
@@ -48,6 +66,7 @@ services:
     depends_on:
       - postgres
       - redis
+      # - postgresTest
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
